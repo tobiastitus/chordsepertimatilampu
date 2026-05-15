@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Chord Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #f5f2ec;
+  color: #1a1a1a;
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  font-size: 15px;
+}
+button, input { font-family: inherit; }
+
+/* ── PAGE TRANSITIONS ── */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ═══════════════════════════
+   MENU PAGE
+═══════════════════════════ */
+.menu-page { min-height: 100vh; display: flex; flex-direction: column; }
+.menu-header {
+  background: #1a1a2e;
+  color: #f5f2ec;
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+}
+.menu-header h1 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+.menu-header p { font-size: 0.85rem; color: #8888aa; letter-spacing: 0.05em; }
+
+/* Nav tabs */
+.menu-tabs {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0 1.5rem 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.menu-tab {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: rgba(255,255,255,0.6);
+  padding: 0.32rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.73rem;
+  font-weight: 500;
+  transition: .15s;
+  letter-spacing: .04em;
+}
+.menu-tab:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.menu-tab.active { background: #f0c94a; color: #1a1a2e; font-weight: 700; }
+
+.song-grid {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+.song-card {
+  background: #fff;
+  border: 1.5px solid #e0ddd6;
+  border-radius: 12px;
+  padding: 1.4rem 1.5rem;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+}
+.song-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--card-color, #4a7fbf);
+  border-radius: 12px 0 0 12px;
+}
+.song-card:hover { border-color: #b0aaa0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.song-card:active { transform: translateY(0); }
+.song-card-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.3rem;
+  line-height: 1.2;
+}
+.song-card-artist { font-size: 0.78rem; color: #888; font-weight: 500; margin-bottom: 0.8rem; }
+.song-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.song-meta-tag {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 0.18rem 0.55rem; border-radius: 20px;
+  background: #f0ede6; color: #666;
+}
+.song-meta-key { background: #1a1a2e; color: #f5f2ec; }
+.add-song-card {
+  background: transparent;
+  border: 1.5px dashed #c8c4bc;
+  border-radius: 12px;
+  padding: 1.4rem 1.5rem;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #aaa;
+  font-size: 0.82rem;
+  font-weight: 500;
+  min-height: 100px;
+  text-align: center;
+}
+.add-song-card:hover { border-color: #888; color: #555; background: #faf9f6; }
+
+/* About page */
+.about-page {
+  max-width: 680px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 4rem;
+}
+.about-card {
+  background: #fff;
+  border: 1px solid #e0ddd6;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.about-card h2 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #e0ddd6;
+}
+.about-card p { font-size: 0.85rem; color: #555; line-height: 1.7; margin-bottom: 0.6rem; }
+.about-card p:last-child { margin-bottom: 0; }
+.about-card ul { padding-left: 1.2rem; }
+.about-card ul li { font-size: 0.83rem; color: #555; line-height: 1.7; }
+.token-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 0.5rem; }
+.token-table th { text-align: left; padding: 0.35rem 0.6rem; background: #f0ede6; font-weight: 600; color: #555; font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; }
+.token-table td { padding: 0.35rem 0.6rem; border-top: 1px solid #e0ddd6; color: #444; font-family: monospace; vertical-align: top; }
+.token-table td:first-child { font-weight: 700; color: #1a1a2e; }
+.token-table td:last-child { font-family: 'DM Sans', sans-serif; color: #666; }
+
+/* Reset button */
+.reset-btn {
+  background: transparent;
+  border: 1.5px solid #e06060;
+  color: #e06060;
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.reset-btn:hover { background: #e06060; color: #fff; }
+
+/* ═══════════════════════════
+   SONG PAGE — LIGHT THEME
+═══════════════════════════ */
+.song-page { min-height: 100vh; background: #f5f2ec; }
+
+/* Top nav bar */
+.song-nav {
+  background: #1a1a2e;
+  color: #f5f2ec;
+  padding: 0.7rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap;
+}
+.back-btn {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #f5f2ec;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: .15s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.2); }
+.song-nav-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.song-nav-right { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+
+/* Key selector */
+.key-wrap { display: flex; align-items: center; gap: 0.3rem; }
+.key-lbl { font-size: 0.6rem; color: rgba(255,255,255,0.5); font-weight:600; text-transform: uppercase; letter-spacing:.1em; }
+.key-step { background: rgba(255,255,255,0.12); border: none; color: #f5f2ec; width: 1.8rem; height: 1.8rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: .15s; }
+.key-step:hover { background: rgba(255,255,255,0.25); }
+.key-badge-btn { background: #f0c94a; color: #1a1a2e; font-family: 'Lora',serif; font-size: 0.95rem; font-weight: 700; padding: 0.18rem 0.75rem; border-radius: 4px; min-width: 2.6rem; text-align: center; cursor: pointer; border: none; letter-spacing: .02em; }
+.key-dropdown { position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 0.5rem; z-index: 500; width: 230px; box-shadow: 0 8px 32px rgba(0,0,0,.15); display: grid; grid-template-columns: repeat(6,1fr); gap: 3px; }
+.key-opt { background: #f5f2ec; border: 1px solid #e0ddd6; color: #444; border-radius: 4px; padding: .25rem .1rem; font-size: .72rem; text-align: center; cursor: pointer; font-family: monospace; transition: .1s; }
+.key-opt:hover { border-color: #aaa; }
+.key-opt.active { background: #1a1a2e; color: #f0c94a; border-color: #1a1a2e; font-weight: 700; }
+
+/* Nav buttons */
+.nav-btn { background: rgba(255,255,255,0.12); border: none; color: #f5f2ec; padding: 0.28rem 0.65rem; border-radius: 4px; font-size: 0.67rem; cursor: pointer; font-weight: 500; transition: .15s; white-space: nowrap; }
+.nav-btn:hover { background: rgba(255,255,255,0.22); }
+.nav-btn.active { background: #f0c94a; color: #1a1a2e; font-weight: 700; }
+.save-btn { background: #2a5a2a; border: none; color: #7ec97e; padding: 0.28rem 0.75rem; border-radius: 4px; font-size: 0.67rem; cursor: pointer; font-weight: 600; transition: .15s; }
+.save-btn.saved { background: #1e4a1e; color: #4aaa5a; }
+/* Song reset button (nav bar version) */
+.song-reset-btn {
+  background: rgba(224,96,96,0.15);
+  border: 1px solid rgba(224,96,96,0.4);
+  color: #ff9090;
+  padding: 0.28rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.67rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: .15s;
+  white-space: nowrap;
+}
+.song-reset-btn:hover { background: rgba(224,96,96,0.3); color: #ffb0b0; }
+
+/* Song content area */
+.song-content { padding: 1.2rem 1rem 4rem; max-width: 960px; margin: 0 auto; }
+
+/* Scale bar */
+.scale-bar { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.scale-card { display: flex; flex-direction: column; align-items: center; background: #fff; border: 1px solid #e0ddd6; border-radius: 5px; padding: 0.25rem 0.5rem; min-width: 2.3rem; gap: 1px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.sc-note { font-family: 'Lora',serif; font-size: 0.88rem; font-weight: 700; color: #b87a10; line-height: 1.1; }
+.sc-deg  { font-size: 0.46rem; font-weight: 700; color: #4a7fbf; letter-spacing: .04em; }
+.sc-q    { font-size: 0.44rem; color: #bbb; font-family: monospace; }
+
+/* Legend */
+.legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1.2rem; margin-bottom: 1rem; padding: 0.55rem 0.9rem; background: #fff; border: 1px solid #e0ddd6; border-radius: 7px; font-size: 0.62rem; color: #888; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.leg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* Toolbar */
+.toolbar { display: flex; gap: 0.35rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+.tb-btn { background: #fff; border: 1px solid #ddd; color: #666; padding: .26rem .65rem; border-radius: 4px; font-size: .67rem; cursor: pointer; font-weight: 500; transition: .15s; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.tb-btn:hover { border-color: #aaa; color: #333; }
+.tb-btn.on { background: #1a1a2e; color: #f0c94a; border-color: #1a1a2e; font-weight: 700; }
+.tb-sep { width: 1px; height: 1.3rem; background: #e0ddd6; }
+
+/* Section */
+.section { background: #fff; border: 1px solid #e0ddd6; border-radius: 9px; margin-bottom: 0.8rem; overflow: visible; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+.sec-hdr { background: #f0ede6; border-bottom: 1px solid #e0ddd6; padding: 0.4rem 0.9rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 9px 9px 0 0; flex-wrap: wrap; }
+.sec-name { font-family: 'Lora',Georgia,serif; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #1a1a1a; background: transparent; border: 1px solid transparent; border-radius: 3px; padding: .07rem .26rem; outline: none; transition: .15s; }
+.sec-name:hover { border-color: rgba(26,26,46,.2); }
+.sec-name:focus { border-color: #4a7fbf; background: rgba(74,127,191,.06); }
+.rep-tag { font-size: .57rem; font-weight: 700; color: #4a7fbf; border: 1px solid #4a7fbf; padding: .04rem .4rem; border-radius: 20px; cursor: pointer; transition: .15s; user-select: none; }
+.rep-tag.empty { opacity: .25; border-color: #bbb; color: #999; }
+.rep-tag:hover { background: #4a7fbf; color: #fff; opacity: 1; }
+.del-sec { margin-left: auto; background: transparent; border: none; color: #ccc; font-size: .75rem; cursor: pointer; padding: .08rem .28rem; border-radius: 3px; transition: .15s; }
+.del-sec:hover { color: #e06060; }
+
+.sec-body { padding: .85rem .9rem .6rem; display: flex; flex-direction: column; gap: .55rem; }
+
+/* Chord row */
+.chord-row { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; padding: .08rem 0; position: relative; }
+.row-num { font-size: .48rem; color: #ccc; width: .8rem; text-align: right; flex-shrink: 0; font-family: monospace; }
+
+/* Chord pill — LIGHT version */
+.chord-pill {
+  display: inline-flex; flex-direction: column; align-items: center;
+  padding: 6px 12px 5px; border-radius: 7px; cursor: pointer;
+  min-width: 2.8rem; text-align: center; gap: 2px;
+  transition: all .15s; user-select: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+}
+.chord-pill:hover { filter: brightness(.96); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.1); }
+.chord-pill:active { transform: translateY(0); }
+.chord-pill.sel { outline: 2px solid #4a7fbf; outline-offset: 1px; }
+
+.chord-pill.t-maj   { background: #fffbe8; border: 1px solid #e8d888; }
+.chord-pill.t-min   { background: #eef7f4; border: 1px solid #88ccbb; }
+.chord-pill.t-slash { background: #eef4fc; border: 1px solid #88aedd; }
+.chord-pill.t-chrom { background: #fff4ee; border: 1px solid #e8aa88; }
+.chord-pill.t-dim   { background: #f8eeff; border: 1px solid #bb88dd; }
+.chord-pill.t-tutti { background: #fef8e0; border: 1.5px dashed #d4aa44; }
+.chord-pill.t-normal{ background: #f5f2ec; border: 1px solid #ddd; }
+
+.ch-name { font-family: 'Lora',Georgia,serif; font-size: 1.1rem; font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.chord-pill.t-maj   .ch-name { color: #7a5800; }
+.chord-pill.t-min   .ch-name { color: #1a6655; }
+.chord-pill.t-slash .ch-name { color: #1a4a8a; }
+.chord-pill.t-chrom .ch-name { color: #8a3a10; }
+.chord-pill.t-dim   .ch-name { color: #6a2a9a; }
+.chord-pill.t-tutti .ch-name { color: #7a5800; font-size: .72rem; letter-spacing: .1em; }
+.chord-pill.t-normal .ch-name { color: #444; }
+.ch-sub { font-size: .5rem; color: #aaa; font-family: monospace; line-height: 1; margin-top: 1px; }
+
+/* Note annotation */
+.chord-annotation { font-size: .55rem; color: #888; font-style: italic; align-self: flex-end; margin-bottom: 2px; flex-shrink: 0; }
+
+.sep { color: #ccc; font-size: .82rem; user-select: none; flex-shrink: 0; font-weight: 300; }
+
+/* Add chord / row */
+.add-ch-btn { display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; height: 2.5rem; border: 1px dashed #ddd; border-radius: 6px; color: #ccc; font-size: 1rem; cursor: pointer; background: transparent; transition: .15s; }
+.add-ch-btn:hover { border-color: #4a7fbf; color: #4a7fbf; }
+.del-row-btn { display: inline-flex; align-items: center; justify-content: center; width: 1.4rem; height: 2.5rem; border: none; background: transparent; color: #ddd; font-size: .7rem; cursor: pointer; transition: .15s; }
+.del-row-btn:hover { color: #e06060; }
+.add-row-wrap { display: flex; justify-content: center; margin-top: .25rem; opacity: 0; transition: .2s; }
+.section:hover .add-row-wrap { opacity: 1; }
+.add-row-btn { background: transparent; border: 1px dashed #ddd; color: #bbb; border-radius: 4px; padding: .1rem 1.4rem; font-size: .58rem; cursor: pointer; transition: .15s; letter-spacing: .06em; }
+.add-row-btn:hover { border-color: #4a7fbf; color: #4a7fbf; }
+
+/* ═══════════════════════════
+   CHORD EDITOR POPUP
+═══════════════════════════ */
+.editor-popup {
+  position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  background: #fff; border: 1.5px solid #4a7fbf; border-radius: 10px;
+  padding: .9rem; z-index: 600; width: 230px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.18);
+}
+.ed-preview { font-family: 'Lora',Georgia,serif; font-size: 1.5rem; font-weight: 700; text-align: center; padding: .35rem; background: #f5f2ec; border-radius: 6px; margin-bottom: .6rem; color: #1a1a1a; min-height: 2.7rem; line-height: 1.2; }
+.ed-label { font-size: .56rem; color: #aaa; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; margin-bottom: .22rem; }
+.ed-input { width: 100%; background: #f5f2ec; border: 1.5px solid #ddd; color: #1a1a1a; padding: .3rem .45rem; border-radius: 5px; font-family: monospace; font-size: .88rem; outline: none; margin-bottom: .6rem; transition: .15s; }
+.ed-input:focus { border-color: #4a7fbf; }
+.ed-group-lbl { font-size: .5rem; color: #bbb; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-top: .3rem; margin-bottom: .18rem; }
+.ed-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: .1rem; }
+.ed-opt { background: #f5f2ec; border: 1px solid #e0ddd6; color: #666; padding: .2rem .38rem; border-radius: 3px; font-size: .62rem; cursor: pointer; font-family: monospace; transition: .1s; }
+.ed-opt:hover { border-color: #aaa; color: #333; }
+.ed-opt.on { background: #1a1a2e; color: #f0c94a; border-color: #1a1a2e; font-weight: 700; }
+.ed-actions { display: flex; gap: .4rem; margin-top: .55rem; }
+.ed-del { background: transparent; border: 1px solid #ddd; color: #aaa; padding: .26rem .5rem; border-radius: 5px; font-size: .62rem; cursor: pointer; transition: .15s; }
+.ed-del:hover { border-color: #e06060; color: #e06060; }
+.ed-ok { flex: 1; background: #1a1a2e; border: none; color: #f0c94a; padding: .26rem; border-radius: 5px; font-size: .65rem; cursor: pointer; font-weight: 700; transition: .15s; }
+.ed-ok:hover { background: #2a2a4e; }
+
+/* Footer */
+.song-footer { text-align: center; font-size: .56rem; color: #bbb; letter-spacing: .06em; margin-top: 2rem; padding-bottom: 1rem; }
+
+/* Confirm dialog overlay */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn .15s ease;
+}
+.confirm-box {
+  background: #fff; border-radius: 12px; padding: 1.8rem 2rem;
+  max-width: 340px; width: 90%; box-shadow: 0 24px 64px rgba(0,0,0,.25);
+  text-align: center;
+}
+.confirm-box h3 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.15rem; font-weight: 700; color: #1a1a1a;
+  margin-bottom: 0.6rem;
+}
+.confirm-box p { font-size: 0.82rem; color: #666; line-height: 1.6; margin-bottom: 1.4rem; }
+.confirm-btns { display: flex; gap: 0.6rem; justify-content: center; }
+.confirm-cancel { background: #f0ede6; border: 1px solid #e0ddd6; color: #666; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: .15s; }
+.confirm-cancel:hover { background: #e0ddd6; }
+.confirm-danger { background: #e06060; border: none; color: #fff; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 700; transition: .15s; }
+.confirm-danger:hover { background: #c04040; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const { useState, useEffect, useRef, useCallback } = React;
+const h = React.createElement;
+
+// ═══════════════════════════════════════
+// DIATONIC ENGINE
+// ═══════════════════════════════════════
+const DIATONIC = {
+  C:['C','D','E','F','G','A','B'], Db:['Db','Eb','F','Gb','Ab','Bb','C'],
+  D:['D','E','F#','G','A','B','C#'], Eb:['Eb','F','G','Ab','Bb','C','D'],
+  E:['E','F#','G#','A','B','C#','D#'], F:['F','G','A','Bb','C','D','E'],
+  'F#':['F#','G#','A#','B','C#','D#','E#'], Gb:['Gb','Ab','Bb','Cb','Db','Eb','F'],
+  G:['G','A','B','C','D','E','F#'], Ab:['Ab','Bb','C','Db','Eb','F','G'],
+  A:['A','B','C#','D','E','F#','G#'], Bb:['Bb','C','D','Eb','F','G','A'],
+  B:['B','C#','D#','E','F#','G#','A#'],
+};
+const KEY_LIST = [
+  {id:'C',l:'C'},{id:'Db',l:'D♭'},{id:'D',l:'D'},{id:'Eb',l:'E♭'},
+  {id:'E',l:'E'},{id:'F',l:'F'},{id:'F#',l:'F♯'},{id:'Gb',l:'G♭'},
+  {id:'G',l:'G'},{id:'Ab',l:'A♭'},{id:'A',l:'A'},{id:'Bb',l:'B♭'},{id:'B',l:'B'},
+];
+const KEY_CYCLE = KEY_LIST.map(k=>k.id);
+const fmt = n => n ? n.replace(/##/g,'𝄪').replace(/#/g,'♯').replace(/b/g,'♭') : '';
+const DEG_LABELS = ['I','II','III','IV','V','VI','VII'];
+const DEG_Q = ['maj','min','min','maj','maj','min','dim'];
+
+function resolveChord(token, key) {
+  const sc = DIATONIC[key]||DIATONIC.C;
+  if (!token||token==='Tutti') return {display:'TUTTI',sub:'',type:'tutti'};
+  if (token==='7') return {display:`${fmt(sc[4])}/${fmt(sc[6])}`,sub:'V/vii',type:'slash'};
+
+  const slCh = token.match(/^(\d+)\/(\d+)#$/);
+  if (slCh) {
+    const cr = fmt(sc[+slCh[1]-1]);
+    const bn = fmt(sc[+slCh[2]-1]+'#');
+    return {display:`${cr}/${bn}`,sub:token,type:'slash'};
+  }
+  const sl = token.match(/^(\d+)\/(\d+)$/);
+  if (sl) {
+    const cr = fmt(sc[+sl[1]-1]);
+    const bn = fmt(sc[+sl[2]-1]);
+    return {display:`${cr}m/${bn}`,sub:token,type:'slash'};
+  }
+  const dim = token.match(/^(\d+)dim$/);
+  if (dim) return {display:`${fmt(sc[+dim[1]-1])}°`,sub:token,type:'dim'};
+  const ch = token.match(/^(\d+)#(m?)$/);
+  if (ch) return {display:`${fmt(sc[+ch[1]-1]+'#')}${ch[2]?'m':''}`,sub:token,type:'chrom'};
+  const nm = token.match(/^(\d+)(m?)$/);
+  if (nm) {
+    const root = fmt(sc[+nm[1]-1]);
+    const isMin = nm[2]==='m';
+    return {display:`${root}${isMin?'m':''}`,sub:token,type:isMin?'min':'maj'};
+  }
+  return {display:fmt(token),sub:token,type:'normal'};
+}
+
+// ═══════════════════════════════════════
+// SONG DATA
+// ═══════════════════════════════════════
+const SONGS_DEFAULT = [
+  {
+    id: 'song1',
+    title: 'Seperti Mati Lampu',
+    artist: 'King Nassar',
+    color: '#4a7fbf',
+    defaultKey: 'E',
+    sections: [
+      {id:1,name:'Intro',repeat:null,rows:[
+        ['6m','5','4','3'],
+        ['6m','5','4','2m','3'],
+        ['6m','1#','2m','Tutti','5','6/7','3'],
+        ['6m','3m','4','6/7','3'],
+        ['6m','3m','4','6/7','3'],
+      ]},
+      {id:2,name:'Verse 1',repeat:null,rows:[
+        ['6m','3m','2#m','2m','1','7','3'],
+        ['6m','3m','2#m','2m','1','6'],
+      ]},
+      {id:3,name:'Pre-Chorus',repeat:'× 2',rows:[
+        ['2m','6m','7','3'],
+        ['2m','6m','7','3'],
+      ]},
+      {id:4,name:'Chorus',repeat:'× 2',rows:[
+        ['6m','7','1','2m','3m','4','5','6m','7','1','3'],
+        ['6m','7','1','2m','3m','4','5','6m','7','1','3'],
+      ]},
+      {id:5,name:'Pre Verse 2',repeat:null,rows:[['1','7','6m','5','4','3']]},
+      {id:6,name:'Verse 2',repeat:null,rows:[['6m','3m','2#m','2m','1','6']]},
+      {id:7,name:'Pre-Chorus 2',repeat:null,rows:[['2m','6m','7','3']]},
+      {id:8,name:'Chorus 2',repeat:'× 2',rows:[
+        ['6m','7','1','2m','3m','4','5','6m','7','1','3'],
+        ['6m','7','1','2m','3m','4','5','6m','7','1','3'],
+      ]},
+      {id:9,name:'Bridge',repeat:null,rows:[['2m','5','1','4','2m','3']]},
+      {id:10,name:'Chorus 3',repeat:null,rows:[
+        ['6m','Tutti','2m','5','4','3m','3'],
+        ['6m','7','1','2m','3m','4','5','6m','7','1','3'],
+      ]},
+      {id:11,name:'Chorus 4',repeat:null,rows:[
+        ['6m','6/1#','2m','Tutti','7','6m','5','5','1','2m','2#','3'],
+      ]},
+      {id:12,name:'Outro',repeat:null,rows:[
+        ['4','3m','2m','1','7','6#','3','6m'],
+      ]},
+    ]
+  },
+  {
+    id: 'song2',
+    title: 'Could It Be Love',
+    artist: 'Raisa',
+    color: '#c0507a',
+    defaultKey: 'D',
+    sections: [
+      {id:1,name:'Intro',repeat:null,rows:[
+        ['4','3m','2m'],
+        ['4','3m','2m','3m','5#','5'],
+        ['4','3m','2m'],
+        ['4','3m','2m','3m','6#','5'],
+      ]},
+      {id:2,name:'Pre Verse 1',repeat:null,rows:[
+        ['4','5','6m','7dim','1','2m','3','6#','5'],
+      ]},
+      {id:3,name:'Verse 1',repeat:null,rows:[
+        ['6m','3m','4','2m','3m','4m','3/5#'],
+        ['6m','3m','2m','5'],
+        ['6m','3m','4','2m','3m','4m','3/5#'],
+        ['6m','3m','2m','5'],
+      ]},
+      {id:4,name:'Chorus 1',repeat:null,rows:[
+        ['4','5','6m','7dim','1','2m','3','6#','5'],
+      ]},
+      {id:5,name:'Pre Verse 2',repeat:null,rows:[
+        ['4','5','6m','6#'],
+      ]},
+      {id:6,name:'Verse 2',repeat:null,rows:[
+        [{t:'6m'},{t:'3m'},{t:'4'},{t:'2m'},{t:'Tutti',note:'(2 3 5 6)'}],
+        ['6m','3m','2m','5'],
+      ]},
+      {id:7,name:'Chorus 2',repeat:null,rows:[
+        ['4','5','6m','7dim','1','2m','3','6#','5'],
+        ['4','5',{t:'6m',note:'staccato'},{t:'7dim',note:'staccato'},'1','2m','3','6#','5'],
+      ]},
+      {id:8,name:'Bridge',repeat:null,rows:[
+        ['2m','3m','4','2#','5#','5'],
+      ]},
+      {id:9,name:'Solo Gitar',repeat:null,rows:[
+        ['1','4','1','5#','2#','4m','5'],
+      ]},
+      {id:10,name:'Solo Vokal',repeat:null,rows:[
+        [{t:'4'},{t:'6m',note:'(repeat)'},'5'],
+      ]},
+      {id:11,name:'Chorus 3',repeat:null,rows:[
+        [{t:'Tutti',note:'DRUM FILL IN'},'2','3','4','5','6m','7dim','1','2m','3','6#','5'],
+        ['4','5','6m','7dim','1','2m','3','6#','5'],
+      ]},
+      {id:12,name:'Outro',repeat:null,rows:[
+        ['4','3m','2m'],
+        ['4','3m','2m','3m','5#','5'],
+        ['4','3m','2m'],
+        ['4','3m','2m','3m','6#'],
+      ]},
+    ]
+  },
+  {
+    id: 'song3',
+    title: 'Alamak',
+    artist: 'Rizky Febian',
+    color: '#4a9a6a',
+    defaultKey: 'C',
+    sections: [
+      {id:31,name:'Intro',repeat:null,rows:[
+        ['4','5','6m','3m','4','Tutti'],
+        ['5#','6#','1m','5#','6#'],
+        ['4m','5m','5#m','6#m'],
+      ]},
+      {id:32,name:'Pre-Verse',repeat:null,rows:[
+        ['1','6m','2m','5'],
+      ]},
+      {id:33,name:'Verse 1',repeat:null,rows:[
+        ['1','6m','2m','5'],
+        ['1','6m','2m','5'],
+      ]},
+      {id:34,name:'Pre-Chorus 1',repeat:null,rows:[
+        ['3m','6m','2m','5'],
+        ['3m','6m','2m','5'],
+      ]},
+      {id:35,name:'Chorus 1',repeat:null,rows:[
+        ['1','3m','6m','2m','5'],
+        ['1','3m','6m','2m','5'],
+      ]},
+      {id:36,name:'Verse 2',repeat:null,rows:[
+        ['4','5','1','3m','6m'],
+        ['5','3m','2m','5','Tutti'],
+      ]},
+      {id:37,name:'Pre-Chorus 2',repeat:null,rows:[
+        ['2m','2#','3m','6m','2m','5'],
+        ['2m','2#','3m','6m','2m','4m','Tutti','5'],
+      ]},
+      {id:38,name:'Chorus 2',repeat:null,rows:[
+        ['1','3m','6m','2m','5'],
+        ['1','3m','6m','2m','5'],
+      ]},
+      {id:39,name:'Bridge',repeat:null,rows:[
+        ['6m','5#','5','2','6#','6m'],
+        ['2m','3m','4','7','1','5#','5'],
+      ]},
+      {id:40,name:'Interlude',repeat:null,rows:[
+        ['2m','3m','4'],
+        ['2m','3m','4'],
+        ['2m','3m','4'],
+        ['2m','3m','4'],
+      ]},
+      {id:41,name:'Chorus 3',repeat:null,rows:[
+        ['1','3m','6m','2m','6#','5'],
+        ['1','3','2m','3m','4','6','5'],
+        ['1','3m','6m','2m','5'],
+        ['1','3m','6m','2m','5'],
+        ['1','3m','6m','2m','5'],
+        ['1','3m','6m','2m','5'],
+      ]},
+      {id:42,name:'Outro',repeat:null,rows:[
+        ['1','3m','6m','2m','5'],
+        ['2m','3m','4'],
+      ]},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════
+// QUICK GROUPS for editor
+// ═══════════════════════════════════════
+const QUICK_GROUPS = [
+  {label:'Diatonic Maj', tokens:['1','2','3','4','5','6','7']},
+  {label:'Diatonic Min', tokens:['1m','2m','3m','4m','5m','6m','7m']},
+  {label:'Diminished',   tokens:['1dim','2dim','3dim','4dim','5dim','6dim','7dim']},
+  {label:'Chromatic',    tokens:['1#','2#','2#m','3#','3#m','4#','5#','6#','6#m']},
+  {label:'Slash / Bass', tokens:['6/7','6/5','6/1#','3/5#','7']},
+  {label:'Special',      tokens:['Tutti']},
+];
+
+// ═══════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════
+const STORE_KEY = 'chordbook_v2';
+function loadState() {
+  try { const v=localStorage.getItem(STORE_KEY); return v?JSON.parse(v):null; } catch{return null;}
+}
+function saveState(songs, keys) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({songs,keys})); } catch(e){alert('Save failed: '+e.message);}
+}
+function clearState() {
+  try { localStorage.removeItem(STORE_KEY); } catch{}
+}
+
+let _nextId = 300;
+
+// ═══════════════════════════════════════
+// HASH ROUTER
+// ═══════════════════════════════════════
+function parseHash() {
+  const hash = window.location.hash.replace(/^#\/?/,'');
+  if (!hash || hash === '') return {page:'menu',tab:'songs'};
+  if (hash === 'about') return {page:'about'};
+  const m = hash.match(/^song\/(.+)$/);
+  if (m) return {page:'song', songId: decodeURIComponent(m[1])};
+  return {page:'menu',tab:'songs'};
+}
+function setHash(hash) {
+  window.location.hash = hash ? '#/' + hash : '#/';
+}
+
+// ═══════════════════════════════════════
+// CONFIRM DIALOG
+// ═══════════════════════════════════════
+function ConfirmDialog({title, message, onConfirm, onCancel, danger}) {
+  return h('div',{className:'confirm-overlay',onClick:onCancel},
+    h('div',{className:'confirm-box',onClick:e=>e.stopPropagation()},
+      h('h3',{},title),
+      h('p',{},message),
+      h('div',{className:'confirm-btns'},
+        h('button',{className:'confirm-cancel',onClick:onCancel},'Cancel'),
+        h('button',{className:'confirm-danger',onClick:onConfirm},danger||'Confirm')
+      )
+    )
+  );
+}
+
+// ═══════════════════════════════════════
+// CHORD PILL COMPONENT
+// ═══════════════════════════════════════
+function ChordPill({token, annotation, currKey, mode, onClick, selected}) {
+  const {display, sub, type} = resolveChord(token, currKey);
+  const nameText = mode==='numerals'?token:display;
+  const subText  = mode==='numerals'?'':sub;
+  return h('div', {
+    onClick,
+    className: `chord-pill t-${type}${selected?' sel':''}`,
+    style:{position:'relative'}
+  },
+    h('span',{className:'ch-name'},nameText),
+    subText && h('span',{className:'ch-sub'},subText),
+    annotation && h('span',{style:{fontSize:'.5rem',color:'#999',fontStyle:'italic',marginTop:1,lineHeight:1,maxWidth:60,textAlign:'center',display:'block'}},annotation)
+  );
+}
+
+// ═══════════════════════════════════════
+// CHORD EDITOR
+// ═══════════════════════════════════════
+function ChordEditor({token, annotation, currKey, onApply, onDelete, onClose}) {
+  const [val, setVal] = useState(token);
+  const [note, setNote] = useState(annotation||'');
+  const inpRef = useRef();
+  const {display} = resolveChord(val.trim()||token, currKey);
+  useEffect(()=>{setTimeout(()=>{inpRef.current?.focus();inpRef.current?.select();},40);},[]);
+  return h('div',{className:'editor-popup'},
+    h('div',{className:'ed-preview'},display),
+    h('div',{className:'ed-label'},'Numeral Code'),
+    h('input',{ref:inpRef,className:'ed-input',value:val,placeholder:'e.g. 6m  2#m  6/7  2dim',
+      onChange:e=>setVal(e.target.value),
+      onKeyDown:e=>{if(e.key==='Enter')onApply(val.trim(),note.trim());if(e.key==='Escape')onClose();}}),
+    h('div',{className:'ed-label'},'Annotation (optional)'),
+    h('input',{className:'ed-input',value:note,placeholder:'e.g. staccato, repeat…',
+      style:{marginBottom:'.5rem'},
+      onChange:e=>setNote(e.target.value),
+      onKeyDown:e=>{if(e.key==='Enter')onApply(val.trim(),note.trim());if(e.key==='Escape')onClose();}}),
+    ...QUICK_GROUPS.map(g=>h('div',{key:g.label},
+      h('div',{className:'ed-group-lbl'},g.label),
+      h('div',{className:'ed-grid'},
+        ...g.tokens.map(t=>h('button',{key:t,className:`ed-opt${val===t?' on':''}`,onClick:()=>setVal(t)},t))
+      )
+    )),
+    h('div',{className:'ed-actions'},
+      h('button',{className:'ed-del',onClick:onDelete},'Delete'),
+      h('button',{className:'ed-ok',onClick:()=>onApply(val.trim(),note.trim())},'Apply ↵')
+    )
+  );
+}
+
+// ═══════════════════════════════════════
+// SONG VIEW PAGE
+// ═══════════════════════════════════════
+function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onResetSong}) {
+  const songIdx = songs.findIndex(s=>s.id===songId);
+  const song = songs[songIdx];
+  const currKey = keysMap[songId] || song.defaultKey;
+  const setCurrKey = k => setKeysMap(prev=>({...prev,[songId]:k}));
+  const scale = DIATONIC[currKey]||DIATONIC.C;
+
+  const [mode, setMode] = useState('chords');
+  const [activeEd, setActiveEd] = useState(null);
+  const [showKeyDd, setShowKeyDd] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  useEffect(()=>{
+    const handler=e=>{
+      if(!e.target.closest('.chord-pill-wrap')&&!e.target.closest('.editor-popup'))setActiveEd(null);
+      if(!e.target.closest('.key-picker-rel'))setShowKeyDd(false);
+    };
+    document.addEventListener('mousedown',handler);
+    return ()=>document.removeEventListener('mousedown',handler);
+  },[]);
+
+  const upd = fn => setSongs(prev=>{
+    const n=JSON.parse(JSON.stringify(prev));
+    fn(n[songIdx]);
+    return n;
+  });
+
+  const stepKey = dir => {
+    const i=KEY_CYCLE.indexOf(currKey);
+    setCurrKey(KEY_CYCLE[(i+dir+KEY_CYCLE.length)%KEY_CYCLE.length]);
+  };
+
+  const isActive=(si,ri,ci)=>activeEd&&activeEd.si===si&&activeEd.ri===ri&&activeEd.ci===ci;
+
+  const applyChord=(si,ri,ci,v,note)=>{
+    upd(s=>{s.sections[si].rows[ri][ci]=note?{t:v,note}:v;});
+    setActiveEd(null);
+  };
+  const delChord=(si,ri,ci)=>{
+    upd(s=>{s.sections[si].rows[ri].splice(ci,1);if(!s.sections[si].rows[ri].length)s.sections[si].rows.splice(ri,1);});
+    setActiveEd(null);
+  };
+  const addChord=(si,ri)=>upd(s=>s.sections[si].rows[ri].push('1'));
+  const addRow=si=>upd(s=>s.sections[si].rows.push(['1']));
+  const delRow=(si,ri)=>upd(s=>{s.sections[si].rows.splice(ri,1);if(!s.sections[si].rows.length)s.sections[si].rows.push(['1']);});
+  const addSection=()=>{const n=prompt('Section name:','New Section');if(n)upd(s=>s.sections.push({id:_nextId++,name:n.trim(),repeat:null,rows:[['1','4','5']]}));};
+  const delSection=si=>{if(confirm(`Remove "${song.sections[si].name}"?`))upd(s=>s.sections.splice(si,1));};
+  const editRepeat=si=>{const v=prompt('Repeat label (empty to remove):',song.sections[si].repeat||'');if(v!==null)upd(s=>s.sections[si].repeat=v.trim()||null);};
+
+  const doSave=()=>{
+    saveState(songs,keysMap);
+    setSaved(true);setTimeout(()=>setSaved(false),2200);
+  };
+
+  const handleResetSong = () => {
+    setShowResetConfirm(false);
+    onResetSong(songId);
+  };
+
+  const getTA = entry => typeof entry==='object'&&entry!==null&&entry.t ? {token:entry.t,annotation:entry.note||''} : {token:entry,annotation:''};
+
+  return h('div',{className:'song-page'},
+    showResetConfirm && h(ConfirmDialog,{
+      title:'Reset this song?',
+      message:`This will restore "${song.title}" to its original chord data and key. Any edits you made will be lost.`,
+      onConfirm:handleResetSong,
+      onCancel:()=>setShowResetConfirm(false),
+      danger:'Reset Song'
+    }),
+
+    // NAV BAR
+    h('div',{className:'song-nav'},
+      h('button',{className:'back-btn',onClick:onBack},'← Menu'),
+      h('div',{className:'song-nav-title'},song.title),
+      h('div',{className:'song-nav-right'},
+        h('div',{className:'key-wrap'},
+          h('span',{className:'key-lbl'},'Key'),
+          h('button',{className:'key-step',onClick:()=>stepKey(-1)},'♭'),
+          h('div',{className:'key-picker-rel',style:{position:'relative'}},
+            h('button',{className:'key-badge-btn',onClick:()=>setShowKeyDd(v=>!v)},fmt(currKey)),
+            showKeyDd&&h('div',{className:'key-dropdown'},
+              ...KEY_LIST.map(k=>h('div',{key:k.id,className:`key-opt${k.id===currKey?' active':''}`,onClick:()=>{setCurrKey(k.id);setShowKeyDd(false);}},k.l))
+            )
+          ),
+          h('button',{className:'key-step',onClick:()=>stepKey(1)},'♯'),
+        ),
+        h('button',{className:'song-reset-btn',onClick:()=>setShowResetConfirm(true)},'↺ Reset'),
+        h('button',{className:`save-btn${saved?' saved':''}`,onClick:doSave},saved?'✓ Saved!':'⬇ Save'),
+      )
+    ),
+
+    // CONTENT
+    h('div',{className:'song-content'},
+      h('div',{className:'scale-bar'},
+        ...scale.map((n,i)=>h('div',{key:i,className:'scale-card'},
+          h('div',{className:'sc-note'},fmt(n)),
+          h('div',{className:'sc-deg'},DEG_LABELS[i]),
+          h('div',{className:'sc-q'},DEG_Q[i])
+        ))
+      ),
+      h('div',{className:'legend'},
+        ...[['#b87a10','Major'],['#1a6655','Minor'],['#1a4a8a','Slash/Bass'],['#8a3a10','Chromatic'],['#6a2a9a','Diminished'],['#b87a10','TUTTI']].map(([c,l])=>
+          h('div',{key:l},h('span',{className:'leg-dot',style:{background:c}}),l)
+        ),
+        h('div',{style:{marginLeft:'auto',color:'#ccc',fontSize:'.58rem'}},'tap chord to edit')
+      ),
+      h('div',{className:'toolbar'},
+        h('button',{className:'tb-btn',onClick:addSection},'+ Section'),
+        h('div',{className:'tb-sep'}),
+        ...['chords','numerals','both'].map(m=>h('button',{key:m,className:`tb-btn${mode===m?' on':''}`,onClick:()=>setMode(m)},m.charAt(0).toUpperCase()+m.slice(1)))
+      ),
+
+      ...song.sections.map((sec,si)=>
+        h('div',{key:sec.id||si,className:'section'},
+          h('div',{className:'sec-hdr'},
+            h('input',{className:'sec-name',value:sec.name,spellCheck:false,
+              style:{width:Math.max(sec.name.length*9+20,80)},
+              onChange:e=>upd(s=>s.sections[si].name=e.target.value)}),
+            h('div',{className:`rep-tag${sec.repeat?'':' empty'}`,onClick:()=>editRepeat(si)},sec.repeat||'+ repeat'),
+            h('button',{className:'del-sec',onClick:()=>delSection(si)},'✕')
+          ),
+          h('div',{className:'sec-body'},
+            ...sec.rows.map((row,ri)=>
+              h('div',{key:ri,className:'chord-row'},
+                h('span',{className:'row-num'},ri+1),
+                ...row.map((entry,ci)=>{
+                  const {token,annotation}=getTA(entry);
+                  return [
+                    ci>0&&h('span',{key:'s'+ci,className:'sep'},'–'),
+                    h('div',{key:'c'+ci,className:'chord-pill-wrap',style:{position:'relative'}},
+                      h(ChordPill,{token,annotation,currKey,mode,selected:isActive(si,ri,ci),
+                        onClick:()=>setActiveEd(isActive(si,ri,ci)?null:{si,ri,ci})}),
+                      isActive(si,ri,ci)&&h(ChordEditor,{token,annotation,currKey,
+                        onApply:(v,note)=>applyChord(si,ri,ci,v,note),
+                        onDelete:()=>delChord(si,ri,ci),
+                        onClose:()=>setActiveEd(null)})
+                    )
+                  ].filter(Boolean);
+                }).flat(),
+                h('button',{className:'add-ch-btn',title:'Add chord',onClick:()=>addChord(si,ri)},'+'),
+                h('button',{className:'del-row-btn',title:'Remove row',onClick:()=>delRow(si,ri)},'✕')
+              )
+            ),
+            h('div',{className:'add-row-wrap'},h('button',{className:'add-row-btn',onClick:()=>addRow(si)},'+ add row'))
+          )
+        )
+      ),
+      h('div',{className:'song-footer'},`Key of ${fmt(currKey)} · ${scale.map(fmt).join(' · ')} · "7" = ${fmt(scale[4])}/${fmt(scale[6])}`)
+    )
+  );
+}
+
+// ═══════════════════════════════════════
+// ABOUT PAGE
+// ═══════════════════════════════════════
+function AboutPage() {
+  return h('div',{className:'about-page'},
+    h('div',{className:'about-card'},
+      h('h2',{},'About Chord Book'),
+      h('p',{},'Chord Book is a live chord chart editor for musicians and arrangers. Songs are displayed using Nashville Number System numerals so the same chart works in any key — just change the key and all chords update instantly.'),
+      h('p',{},'All data is saved locally in your browser. No account or internet connection required after first load.')
+    ),
+    h('div',{className:'about-card'},
+      h('h2',{},'How to Use'),
+      h('ul',{},
+        h('li',{},'Tap any chord pill to open the editor and change its value.'),
+        h('li',{},'Use ♭ / ♯ buttons or the key badge to transpose the song.'),
+        h('li',{},'Press ⬇ Save to persist changes across browser sessions.'),
+        h('li',{},'Use ↺ Reset on a song page to restore that song\'s original chords.'),
+        h('li',{},'Use Reset All on the Songs tab to restore every song to defaults.'),
+        h('li',{},'Click + Section in the toolbar to add a new section.'),
+        h('li',{},'Hover a section to reveal the + add row button.')
+      )
+    ),
+    h('div',{className:'about-card'},
+      h('h2',{},'Chord Token Reference'),
+      h('table',{className:'token-table'},
+        h('thead',{},h('tr',{},h('th',{},'Token'),h('th',{},'Example in C'),h('th',{},'Meaning'))),
+        h('tbody',{},
+          [
+            ['1','C','Major triad on degree 1'],
+            ['6m','Am','Minor triad on degree 6'],
+            ['2dim','Ddim','Diminished on degree 2'],
+            ['2#m','C♯m','Chromatic minor (raised 2nd)'],
+            ['6/7','Am/B','Minor slash bass: 6 over 7'],
+            ['3/5#','Em/G♯','Major slash chromatic bass'],
+            ['7','G/B','V over leading tone shorthand'],
+            ['Tutti','TUTTI','Whole band plays together'],
+          ].map(([tok,ex,desc])=>
+            h('tr',{key:tok},h('td',{},tok),h('td',{},ex),h('td',{style:{fontFamily:'inherit'}},desc))
+          )
+        )
+      )
+    ),
+    h('div',{className:'about-card'},
+      h('h2',{},'Credits'),
+      h('p',{},'Built for The Titus Project. Chord data arranged by Tobias Titus.'),
+      h('p',{style:{color:'#bbb',fontSize:'0.75rem'}},'Version 2.1 · Chord Book')
+    )
+  );
+}
+
+// ═══════════════════════════════════════
+// MENU PAGE
+// ═══════════════════════════════════════
+function MenuPage({songs, setSongs, keysMap, onSelectSong, tab, setTab, onResetAll}) {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const addSong = () => {
+    const title = prompt('Song title:','New Song');
+    if(!title) return;
+    const artist = prompt('Artist name (optional):','');
+    const colors = ['#4a7fbf','#c0507a','#4a9a6a','#8a6abf','#bf7a2a','#2a9aaa'];
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    setSongs(prev=>[...prev,{
+      id:'song'+Date.now(),title:title.trim(),artist:artist.trim(),color,
+      defaultKey:'C',
+      sections:[{id:_nextId++,name:'Verse 1',repeat:null,rows:[['1','4','5','6m']]}]
+    }]);
+  };
+  const delSong = (e,id) => {
+    e.stopPropagation();
+    const s=songs.find(x=>x.id===id);
+    if(confirm(`Remove "${s.title}"?`)) setSongs(prev=>prev.filter(x=>x.id!==id));
+  };
+
+  return h('div',{className:'menu-page'},
+    showResetConfirm && h(ConfirmDialog,{
+      title:'Reset all songs?',
+      message:'This will restore all songs and keys to their original defaults. All your edits, added songs, and saved changes will be permanently lost.',
+      onConfirm:()=>{setShowResetConfirm(false);onResetAll();},
+      onCancel:()=>setShowResetConfirm(false),
+      danger:'Reset Everything'
+    }),
+
+    h('div',{className:'menu-header'},
+      h('h1',{},'🎵 The Titus Project Arrangement'),
+      h('p',{},'select a song to open the chord chart')
+    ),
+    h('div',{className:'menu-tabs'},
+      h('button',{className:`menu-tab${tab==='songs'?' active':''}`,onClick:()=>setTab('songs')},'Songs'),
+      h('button',{className:`menu-tab${tab==='about'?' active':''}`,onClick:()=>setTab('about')},'About & Help'),
+    ),
+
+    tab === 'songs' && h('div',{className:'song-grid'},
+      ...songs.map(song=>
+        h('div',{key:song.id,className:'song-card',style:{'--card-color':song.color},onClick:()=>onSelectSong(song.id)},
+          h('div',{className:'song-card-title'},song.title),
+          song.artist&&h('div',{className:'song-card-artist'},song.artist),
+          h('div',{className:'song-card-meta'},
+            h('div',{className:'song-meta-tag song-meta-key'},fmt(keysMap[song.id]||song.defaultKey)),
+            h('div',{className:'song-meta-tag'},`${song.sections.length} sections`),
+            h('button',{
+              onClick:e=>delSong(e,song.id),
+              style:{marginLeft:'auto',background:'transparent',border:'none',color:'#ccc',cursor:'pointer',fontSize:'0.75rem',padding:'0.1rem 0.3rem',borderRadius:3},
+              title:'Remove song'
+            },'✕')
+          )
+        )
+      ),
+      h('div',{className:'add-song-card',onClick:addSong},
+        h('span',{style:{fontSize:'1.5rem',color:'#ddd'}},'＋'),
+        h('span',{},'Add Song')
+      ),
+      // Reset all — subtle at bottom of grid, full width
+      h('div',{style:{gridColumn:'1/-1',display:'flex',justifyContent:'flex-end',paddingTop:'0.5rem'}},
+        h('button',{className:'reset-btn',onClick:()=>setShowResetConfirm(true)},'↺ Reset All Songs to Default')
+      )
+    ),
+
+    tab === 'about' && h(AboutPage,{})
+  );
+}
+
+// ═══════════════════════════════════════
+// ROOT APP
+// ═══════════════════════════════════════
+function App() {
+  const stored = loadState();
+  const [songs, setSongs] = useState(stored?.songs || SONGS_DEFAULT);
+  const [keysMap, setKeysMap] = useState(stored?.keys || {});
+
+  // Hash-based routing
+  const [route, setRoute] = useState(parseHash);
+  const [menuTab, setMenuTab] = useState('songs');
+
+  useEffect(()=>{
+    const onHash = () => setRoute(parseHash());
+    window.addEventListener('hashchange', onHash);
+    return ()=>window.removeEventListener('hashchange', onHash);
+  },[]);
+
+  const handleSetSongs = useCallback(fn=>{
+    setSongs(prev => typeof fn==='function' ? fn(prev) : fn);
+  },[]);
+
+  const handleSelectSong = id => {
+    setHash('song/'+id);
+  };
+
+  const handleBack = () => {
+    setHash('');
+  };
+
+  const handleResetAll = () => {
+    clearState();
+    setSongs(JSON.parse(JSON.stringify(SONGS_DEFAULT)));
+    setKeysMap({});
+  };
+
+  const handleResetSong = (songId) => {
+    const original = SONGS_DEFAULT.find(s => s.id === songId);
+    if (original) {
+      setSongs(prev => prev.map(s => s.id === songId ? JSON.parse(JSON.stringify(original)) : s));
+      setKeysMap(prev => {
+        const next = {...prev};
+        delete next[songId];
+        return next;
+      });
+    }
+  };
+
+  if (route.page === 'song' && route.songId && songs.find(s=>s.id===route.songId)) {
+    return h(SongPage,{
+      songId: route.songId,
+      songs, setSongs: handleSetSongs,
+      keysMap, setKeysMap,
+      onBack: handleBack,
+      onResetSong: handleResetSong
+    });
+  }
+
+  return h(MenuPage,{
+    songs, setSongs: handleSetSongs,
+    keysMap,
+    tab: menuTab,
+    setTab: setMenuTab,
+    onSelectSong: handleSelectSong,
+    onResetAll: handleResetAll
+  });
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
