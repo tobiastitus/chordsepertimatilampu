@@ -600,6 +600,15 @@ body {
   .dock-group { padding-left: .6rem; }
   .dock-mini { width: 1.8rem; height: 1.8rem; }
 }
+
+/* lyrics */
+.lyrics { white-space: pre-wrap; margin-top: .4rem; padding: .8rem 1.1rem; border-left: 3px solid var(--red); background: rgba(255,255,255,.035); border-radius: 0 14px 14px 0; font-size: 1rem; line-height: 1.75; color: var(--ink); }
+.lyr-edit { margin-top: .4rem; display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+.lyr-input { width: 100%; min-height: 9rem; resize: vertical; background: rgba(255,255,255,.06); border: 1.5px solid var(--line); border-radius: 14px; color: var(--ink); padding: .8rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; line-height: 1.6; outline: none; }
+.lyr-input:focus { border-color: var(--acid); box-shadow: 0 0 16px rgba(255,241,46,.18); }
+.lyr-done { background: var(--acid); color: #120609; border: none; font-weight: 700; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; padding: .4rem 1.1rem; border-radius: 999px; cursor: pointer; }
+.song-page.stage .lyr-tag { display: none; }
+.song-page.stage .lyrics { font-size: calc(1rem * var(--sz)); border-left-width: 4px; }
 </style>
 </head>
 <body>
@@ -648,7 +657,8 @@ function resolveChord(token, key) {
   if (sl) {
     const cr = fmt(sc[+sl[1]-1]);
     const bn = fmt(sc[+sl[2]-1]);
-    return {display:`${cr}m/${bn}`,sub:token,type:'slash'};
+    const q = DEG_Q[+sl[1]-1]==='min' ? 'm' : '';   // 6/7 = Am/B, 5/4 = A/G (quality follows the chord's degree)
+    return {display:`${cr}${q}/${bn}`,sub:token,type:'slash'};
   }
   const dim = token.match(/^(\d+)dim$/);
   if (dim) return {display:`${fmt(sc[+dim[1]-1])}°`,sub:token,type:'dim'};
@@ -1075,6 +1085,21 @@ const SONGS_DEFAULT = [
         ['1','5','2m','3m','4','5','1'],
       ]},
     ]
+  },
+  {
+    id: 'song10',
+    title: 'INTRO 1',
+    artist: '',
+    color: '#4a9a6a',
+    defaultKey: 'D',
+    sections: [
+      {id:140,name:'Intro',repeat:null,rows:[
+        ['1','1','5/4','1'],
+        ['4','2m','6m','5'],
+        ['4','2m','6m','5'],
+        ['2m','5','1'],
+      ]},
+    ]
   }
 ];
 
@@ -1101,7 +1126,7 @@ const EDITOR_KEY = 'chordbook_editor_v1';       // editor passcode remembered on
 // starter tags for the built-in songs (editors can change them)
 const DEFAULT_TAGS = {
   sepertimatilampu:['Pop'], song2:['Pop'], song3:['Pop'], song4:['Medley'],
-  song5:['Jawa'], song6:['Jawa'], song7:['Kosmus'], song8:['Pop'], song9:['Pop']
+  song5:['Jawa'], song6:['Jawa'], song7:['Kosmus'], song8:['Pop'], song9:['Pop'], song10:['Intro']
 };
 SONGS_DEFAULT.forEach(s=>{ s.tags = (DEFAULT_TAGS[s.id]||[]).slice(); });
 
@@ -1339,6 +1364,9 @@ function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onReset
   const [showKeyDd, setShowKeyDd] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(true);
+  const [lyrEd, setLyrEd] = useState(null);
+  const hasLyrics = song.sections.some(x=>x.lyrics&&x.lyrics.trim());
   const ro = !canEdit || stage;
 
   const ctxKey = inSet ? ctx.setlist.id+':'+ctx.index : '';
@@ -1355,7 +1383,7 @@ function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onReset
   };
 
   // reset view state when the song (or setlist position) changes
-  useEffect(()=>{ setTmpKey(null); setActiveEd(null); setScrolling(false); window.scrollTo(0,0); },[songId,ctxKey]);
+  useEffect(()=>{ setTmpKey(null); setActiveEd(null); setLyrEd(null); setScrolling(false); window.scrollTo(0,0); },[songId,ctxKey]);
 
   useEffect(()=>{
     const handler=e=>{
@@ -1517,7 +1545,9 @@ function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onReset
       h('div',{className:'toolbar'},
         canEdit && h('button',{className:'tb-btn',onClick:addSection},'+ Section'),
         canEdit && h('div',{className:'tb-sep'}),
-        ...['chords','numerals','both'].map(m=>h('button',{key:m,className:`tb-btn${mode===m?' on':''}`,onClick:()=>setMode(m)},m.charAt(0).toUpperCase()+m.slice(1)))
+        ...['chords','numerals','both'].map(m=>h('button',{key:m,className:`tb-btn${mode===m?' on':''}`,onClick:()=>setMode(m)},m.charAt(0).toUpperCase()+m.slice(1))),
+        hasLyrics && h('div',{className:'tb-sep'}),
+        hasLyrics && h('button',{className:`tb-btn${showLyrics?' on':''}`,onClick:()=>setShowLyrics(v=>!v)},'Lyrics')
       ),
 
       ...song.sections.map((sec,si)=>
@@ -1528,6 +1558,7 @@ function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onReset
                    style:{width:Math.max(sec.name.length*9+20,80)},
                    onChange:e=>upd(s=>s.sections[si].name=e.target.value)}),
             (canEdit||sec.repeat) && h('div',{className:`rep-tag${sec.repeat?'':' empty'}`,onClick:()=>ro?null:editRepeat(si)},sec.repeat||'+ repeat'),
+            canEdit && h('div',{className:'rep-tag lyr-tag'+(sec.lyrics?'':' empty'),onClick:()=>setLyrEd(lyrEd===si?null:si)},sec.lyrics?'✎ lyrics':'+ lyrics'),
             canEdit && h('button',{className:'del-sec',onClick:()=>delSection(si)},'✕')
           ),
           h('div',{className:'sec-body'},
@@ -1552,6 +1583,11 @@ function SongPage({songId, songs, setSongs, keysMap, setKeysMap, onBack, onReset
                 canEdit && h('button',{className:'del-row-btn',title:'Remove row',onClick:()=>delRow(si,ri)},'✕')
               )
             ),
+            (canEdit && !stage && lyrEd===si)
+              ? h('div',{className:'lyr-edit'},
+                  h('textarea',{className:'lyr-input',value:sec.lyrics||'',placeholder:'Type or paste the lyrics for this section…',onChange:e=>upd(s=>{s.sections[si].lyrics=e.target.value;})}),
+                  h('button',{className:'lyr-done',onClick:()=>setLyrEd(null)},'Done'))
+              : ((showLyrics && sec.lyrics && sec.lyrics.trim()) ? h('div',{className:'lyrics'},sec.lyrics) : null),
             canEdit && h('div',{className:'add-row-wrap'},h('button',{className:'add-row-btn',onClick:()=>addRow(si)},'+ add row'))
           )
         )
@@ -1697,6 +1733,7 @@ function AboutPage() {
       h('ul',{},
         h('li',{},'Press 🔒 Editor login and enter the passcode.'),
         h('li',{},'Tap any chord to change it. Use + Section, + add row, + tag and the ✕ buttons to organise a song.'),
+        h('li',{},'Press “+ lyrics” in a section header to type or paste lyrics for that section. They appear under the chords for everyone.'),
         h('li',{},'Changes are not shared until you press Save. A bar at the bottom of the screen reminds you when something is unsaved.'),
         h('li',{},'Saving from a song page also makes the key you are viewing the new default key for that song.'),
         h('li',{},'In Setlists, add songs, reorder with ▲ ▼, pick a key for each song and add a note such as “Pembukaan”.'),
@@ -1713,7 +1750,8 @@ function AboutPage() {
             ['6m','Am','Minor triad on degree 6'],
             ['2dim','Ddim','Diminished on degree 2'],
             ['2#m','C♯m','Chromatic minor (raised 2nd)'],
-            ['6/7','Am/B','Minor slash bass: 6 over 7'],
+            ['6/7','Am/B','Slash bass: 6 over 7 (minor, because 6 is a minor chord)'],
+            ['5/4','A/G','Slash bass: 5 over 4 (major, because 5 is a major chord)'],
             ['3/5#','Em/G♯','Major slash chromatic bass'],
             ['7','G/B','V over leading tone shorthand'],
             ['Tutti','TUTTI','Whole band plays together'],
@@ -1734,7 +1772,7 @@ function AboutPage() {
 // ═══════════════════════════════════════
 // MENU PAGE (songs · setlists · about)
 // ═══════════════════════════════════════
-function MenuPage({songs, setSongs, setlists, keysMap, tab, setTab, onSelectSong, onOpenSetlist, onCreateSetlist, onResetAll, canEdit, mode, editorOk, onLoginClick, onLogout}) {
+function MenuPage({songs, setSongs, setlists, keysMap, tab, setTab, onSelectSong, onOpenSetlist, onCreateSetlist, onResetAll, canEdit, mode, editorOk, onLoginClick, onLogout, setupHint, onSetupClick}) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [q, setQ] = useState('');
   const [activeTag, setActiveTag] = useState('');
@@ -1890,6 +1928,7 @@ function MenuPage({songs, setSongs, setlists, keysMap, tab, setTab, onSelectSong
       h('div',{className:'ma-left'},
         canEdit && tab==='songs' && h('button',{className:'pill ghost',onClick:addSong},'+ Add song'),
         canEdit && tab==='setlists' && h('button',{className:'pill ghost',onClick:onCreateSetlist},'+ New setlist'),
+        mode==='local' && setupHint && h('button',{className:'reset-btn',onClick:onSetupClick},'⚙ Shared saving: not set up'),
         mode==='shared' && !editorOk && h('button',{className:'reset-btn',onClick:onLoginClick},'🔒 Editor login'),
         mode==='shared' && editorOk && h('button',{className:'reset-btn editing',onClick:onLogout},'✎ Editing · Log out')
       ),
@@ -1922,6 +1961,8 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [conflict, setConflict] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [setupHint, setSetupHint] = useState(null);
+  const [showSetup, setShowSetup] = useState(false);
   const toastTimer = useRef(null);
 
   const canEdit = mode==='local' || (mode==='shared' && editorOk);
@@ -1951,7 +1992,7 @@ function App() {
       let j=null; try{ j=await r.json(); }catch(e){}
       if (r.status===404 || (r.ok && !j)) { if (opts.initial) goLocal(); return; }
       if (!r.ok || !j) throw new Error('bad response');
-      if (!j.configured) { if (opts.initial) goLocal(); return; }
+      if (!j.configured) { if (opts.initial) { setSetupHint({passcodeSet:!!j.passcodeSet}); goLocal(); } return; }
       if (!opts.initial && !opts.force) {
         if (dirtyRef.current) return;
         if (modeRef.current==='shared' && j.version===versionRef.current) return;
@@ -2095,6 +2136,10 @@ function App() {
   const sharedBits = [
     mode==='offline' && h('div',{key:'off',className:'status-banner'},'Offline — showing the last saved copy. Editing is paused until the connection is back.'),
     toastMsg && h('div',{key:'toast',className:'toast',role:'status'},toastMsg),
+    showSetup && h(ConfirmDialog,{key:'setup',
+      title:'Shared saving is not set up yet',
+      message:'The website cannot find its database'+(setupHint&&!setupHint.passcodeSet?' or the editor passcode':'')+', so edits are only saved on this device. In Vercel, connect the Upstash Redis database to this project'+(setupHint&&!setupHint.passcodeSet?', add the EDITOR_PASSCODE setting':'')+' and press Redeploy (README, Part 3).',
+      onConfirm:()=>setShowSetup(false), onCancel:()=>setShowSetup(false), danger:'OK'}),
     showLogin && h(PasscodeDialog,{key:'login',onSubmit:login,onCancel:()=>setShowLogin(false)}),
     conflict && h(ConflictDialog,{key:'conf',
       onLoad:()=>{ setConflict(false); refresh({force:true}).then(()=>toast('Loaded the latest version')); },
@@ -2144,7 +2189,7 @@ function App() {
       onOpenSetlist:id=>setHash('setlist/'+id),
       onCreateSetlist:createSetlist,
       onResetAll:handleResetAll, canEdit, mode, editorOk,
-      onLoginClick:()=>setShowLogin(true), onLogout:logout
+      onLoginClick:()=>setShowLogin(true), onLogout:logout, setupHint, onSetupClick:()=>setShowSetup(true)
     });
   }
 
