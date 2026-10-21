@@ -13,9 +13,19 @@ const DATA_KEY = 'kosmus-chordbook:data';
 const BACKUP_KEY = 'kosmus-chordbook:previous';
 const MAX_BYTES = 900 * 1024; // stay under Upstash's 1 MB request limit
 
+function findEnv(suffixes, avoid) {
+  for (const name of Object.keys(process.env)) {
+    if (avoid && name.includes(avoid)) continue;
+    if (suffixes.some((x) => name.endsWith(x)) && process.env[name]) return process.env[name];
+  }
+  return undefined;
+}
+
+// Works with the names Upstash/Vercel normally add (KV_REST_API_* or UPSTASH_REDIS_REST_*),
+// and also with a custom prefix such as STORAGE_REST_API_URL.
 function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || findEnv(['_REST_API_URL', '_REST_URL']);
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || findEnv(['_REST_API_TOKEN', '_REST_TOKEN'], 'READ_ONLY');
   return url && token ? { url, token } : null;
 }
 
@@ -45,7 +55,7 @@ module.exports = async function handler(req, res) {
 
   // ---------- READ (everyone) ----------
   if (req.method === 'GET') {
-    if (!redisConfig()) return res.status(200).json({ configured: false });
+    if (!redisConfig()) return res.status(200).json({ configured: false, passcodeSet: !!process.env.EDITOR_PASSCODE });
     try {
       const raw = await redis(['GET', DATA_KEY]);
       if (!raw) return res.status(200).json({ configured: true, version: 0, data: null });
